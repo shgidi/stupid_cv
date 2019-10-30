@@ -1,0 +1,7 @@
+training_params:
+    bs: 8
+    img_sz: 256
+    valid_pct: 0.2
+    model_name: "resnet34"
+    epochs: 3
+    lr: 0.01
