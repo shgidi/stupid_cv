@@ -15,25 +15,6 @@ All technologists are automation enthusiasts and - lets face it - script kiddies
 Open images v4 allows to easilly and programmitacly download many images according classes (unlike imagenet, there may be numerous objects in every image)
 
 
-
-dataset specification can be loaded from here:
-
-dataset_type = train (1.1MB), validation (16MB), test (50MB) (train is very big)
-
-https://storage.googleapis.com/openimages/2018_04/{dataset_type}/{dataset_type}-annotations-bbox.csv All records are annotated with bounding boxes.
-
-classes specification can be loaded from here:
-
-https://storage.googleapis.com/openimages/2018_04/class-descriptions-boxable.csv
-
-
-Use it ass follows:
-1. `python stupid_cv.py --data_root <some_dir> --classes Apple,Banana,Orange`
-2. Wait for it..
-3. Find the model in `<some_dir>/models
-4. Profit!
-
-
 ## Install
 
 To install, clone this repo, and install the requirements. You'd better have GPU on your machine.
@@ -44,11 +25,21 @@ First, get the open images data frames:
 
 Dataset type is one of train, validation, test
 https://storage.googleapis.com/openimages/2018_04/{dataset_type}/{dataset_type}-annotations-bbox.csv
+dataset_type = train (1.1MB), validation (16MB), test (50MB) (train is very big)
+
+classes specification can be loaded from here:
+
+https://storage.googleapis.com/openimages/2018_04/class-descriptions-boxable.csv
+
 ### List all classes
 `python list_classes.py`
 
 ### Run all pipeline
-`python stupid_cv.py`
+Use it ass follows:
+1. `python stupid_cv.py --data_root <some_dir> --classes Apple,Banana,Orange`
+2. Wait for it..
+3. Find the model in `<some_dir>/models
+4. Profit!
 
 Arguments:
 
@@ -57,7 +48,9 @@ Arguments:
 * `classes` - select classes to download and train a model on, from open images 600 classes
 * `cut_image` - should the training script "cut" the relevant objects from the images
 
-Run:
+### Config
+
+Config model in `config.yaml`
 
 ## Todo: 
 * Add requirements
