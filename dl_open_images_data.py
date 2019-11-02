@@ -94,9 +94,9 @@ class Data_utils:
 
     def dl_classes(self, df, bucket, class_name_count, cut_images_flag=False):
         try:
-            ids = [class_name_count[class_name_count.name == c].id.values[0] for c in self.classes]
+            ids = class_name_count[class_name_count.name.isin(self.classes)]
         except:
-            print(f'classes {self.classes} do not exist',)
+             print(f'classes {self.classes} do not exist',)
         df1 = df[df.LabelName.isin(ids)]
         imgs = df1.drop_duplicates('ImageID')
 

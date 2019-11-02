@@ -36,7 +36,7 @@ https://storage.googleapis.com/openimages/2018_04/class-descriptions-boxable.csv
 
 ### Run all pipeline
 Use it ass follows:
-1. `python stupid_cv.py --data_root <some_dir> --classes Apple,Banana,Orange`
+1. `python main.py --data_root <some_dir> --classes Apple Banana Orange`
 2. Wait for it..
 3. Find the model in `<some_dir>/models
 4. Profit!
