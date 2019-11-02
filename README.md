@@ -53,10 +53,9 @@ Arguments:
 Config model in `config.yaml`
 
 ## Todo: 
-* Add requirements
-* Upgrade to open images 5
-* Add list_classes.py
-* Check functionallity of cut_images
-* Add detection (and segmentation?) functionallity
-* Add efficient tracking
-* Add serving/deploy
+- [ ] Upgrade to open images 5
+- [x] Add list_classes.py
+- [ ] Check functionallity of cut_images
+- [ ] Add detection (and segmentation?) functionallity
+- [ ] Add efficient tracking
+- [ ] Add serving/deploy
