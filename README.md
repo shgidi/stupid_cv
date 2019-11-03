@@ -35,7 +35,7 @@ https://storage.googleapis.com/openimages/2018_04/class-descriptions-boxable.csv
 `python list_classes.py`
 
 ### Run all pipeline
-Use it ass follows:
+Use it as follows:
 1. `python main.py --data_root <some_dir> --classes Apple Banana Orange`
 2. Wait for it..
 3. Find the model in `<some_dir>/models
@@ -53,10 +53,9 @@ Arguments:
 Config model in `config.yaml`
 
 ## Todo: 
-* Add requirements
-* Upgrade to open images 5
-* Add list_classes.py
-* Check functionallity of cut_images
-* Add detection (and segmentation?) functionallity
-* Add efficient tracking
-* Add serving/deploy
+- [ ] Upgrade to open images 5
+- [x] Add list_classes.py
+- [ ] Check functionallity of cut_images
+- [ ] Add detection (and segmentation?) functionallity
+- [ ] Add efficient tracking
+- [ ] Add serving/deploy
