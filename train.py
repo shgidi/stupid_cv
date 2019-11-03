@@ -35,7 +35,7 @@ def train(data_root, classes):
     df = get_dataframe(data_root, classes)
     
     tfms = get_transforms(xtra_tfms=zoom_crop(scale=(0.75,2), do_rand=True))
-    data = ImageDataBunch.from_df(data_root,df,bs=bs,valid_pct=.2,size=img_sz,ds_tfms=tfms)
+    data = ImageDataBunch.from_df(data_root, df,bs=bs,valid_pct=.2,size=img_sz,ds_tfms=tfms)
     # max bs is 4 for these setings
     data.normalize(imagenet_stats)
 
@@ -62,7 +62,7 @@ def train(data_root, classes):
     learn = learn.mixup(alpha=mixup)
     augs = {'mixup':mixup}
     
-    #logging.info(f'training {model_name} on {len(data)} images')
+    logging.info(f'training {model_name} on {Counter(df.label)} images')
     learn.fit(epochs,lr, callbacks=[SaveModelCallback(learn, every='improvement', monitor='f_beta')])
     logging.info(f'bestmodel.pth saved at {models_dir_time}')
 

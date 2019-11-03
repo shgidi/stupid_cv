@@ -94,12 +94,13 @@ class Data_utils:
 
     def dl_classes(self, df, bucket, class_name_count, cut_images_flag=False):
         try:
-            ids = class_name_count[class_name_count.name.isin(self.classes)]
+            ids = class_name_count[class_name_count.name.isin(self.classes)].id.values
         except:
-             print(f'classes {self.classes} do not exist',)
+            print(f'classes {self.classes} do not exist',)
         df1 = df[df.LabelName.isin(ids)]
         imgs = df1.drop_duplicates('ImageID')
 
+        logging.info('downloading images', Counter([self.id2name[i] for i in df1.LabelName.values]))
         for j in range(len(imgs)//n_work):
             image_files = [f'{self.id2name[i[1].LabelName]}/{i[1].ImageID}.jpg' for i in imgs[(n_work)*j:n_work*(j+1)].iterrows()]
             self.batch_download(bucket, image_files, self.data_root, n_work, False)
@@ -108,10 +109,10 @@ class Data_utils:
             print(cut_images_flag)
             self.cut_images(imgs)
 
-        logging.info(Counter([self.id2name[i] for i in df1.LabelName.values]))
 
     def cut_images(self, df):
-        print('cut images')
+        # After downloading data, generate new data folders, named sliced_X
+        # TODO: allow multiple instances per image
         for record in df.iterrows():
             try:
                 r = record[1]
@@ -120,7 +121,7 @@ class Data_utils:
                 cut_im = np.array(im)[int(im.size[0]*r.YMin):int(im.size[0]*r.YMax ) ,int(im.size[1]*r.XMin):int(im.size[1]*r.XMax)]
                 cut_im = Image.fromarray(cut_im)
                 path = os.path.join(self.id2name[r.LabelName],f'{r.ImageID}.jpg')
-                dir_name = os.path.dirname(os.path.join(self.data_root,f"slice_{path}"))
+                dir_name = os.path.dirname(os.path.join(self.data_root, f"slice_{path}"))
                 if not os.path.exists(dir_name):
                     os.makedirs(dir_name)
                 cut_im.save(os.path.join(self.data_root,f"slice_{path}"))
@@ -149,10 +150,9 @@ if __name__ == '__main__':
     s3, bucket = data_utils.get_s3()
 
     df ,class_name_count = data_utils.get_data_sets()
-    
-    # currently prepare dirs manually
+
     data_utils.dl_classes(df, bucket, class_name_count, args.cut_images)
     
-    # tODO: add logging, add prepare dirs logic
+    # TODO: add logging, add prepare dirs logic
     
     # python dl_open_images_data.py --data_root=<data_root>' --classes Apple Banana

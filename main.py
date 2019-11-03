@@ -29,4 +29,7 @@ if __name__ == '__main__':
     # currently prepare dirs manually
     data_utils.dl_classes(df, bucket, class_name_count, args.cut_images)
     
+    if args.cut_images:
+        classes = [f'slice_{c}' for c in classes]
+        
     train(data_root, classes)
