@@ -35,7 +35,7 @@ https://storage.googleapis.com/openimages/2018_04/class-descriptions-boxable.csv
 `python list_classes.py`
 
 ### Run all pipeline
-Use it ass follows:
+Use it as follows:
 1. `python main.py --data_root <some_dir> --classes Apple Banana Orange`
 2. Wait for it..
 3. Find the model in `<some_dir>/models
