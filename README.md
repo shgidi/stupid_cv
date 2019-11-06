@@ -59,3 +59,5 @@ Config model in `config.yaml`
 - [ ] Add detection (and segmentation?) functionallity
 - [ ] Add efficient tracking
 - [ ] Add serving/deploy
+
+Credit for open image downloader: https://github.com/qfgaohao/pytorch-ssd
