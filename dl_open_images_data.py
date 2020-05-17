@@ -11,7 +11,8 @@ import botocore
 from PIL import Image
 
 # for DL
-from multiprocessing import Pool, Manager
+from multiprocessing import  Manager
+from pathos.multiprocessing import ProcessingPool as Pool
 import functools
 import logging
 import argparse
@@ -23,17 +24,15 @@ n_work=10
                 
 # define s3 object
 class Data_utils:
-    def __init__(self, data_root, classes, data_type):
+    def __init__(self, data_root, classes, data_type, batch_dl=1):
         self.classes = classes
         self.data_root = data_root
         self.data_type = data_type
-        
+        self.batch_dl = int(batch_dl)
+
     def get_s3(self):
-        s3 = boto3.client('s3', config=Config(signature_version=UNSIGNED))
-        bucket = "open-images-dataset"
-
-        return s3, bucket
-
+        self.s3 = boto3.client('s3', config=Config(signature_version=UNSIGNED))
+        self.bucket = "open-images-dataset"
 
     # some data manipulations
 
@@ -56,14 +55,14 @@ class Data_utils:
         return df, class_name_count
 
     
-    def download(self, bucket, root, retry, counter, lock, path):
+    def download(self, root, retry, counter, lock, path):
         i = 0
         src = '/'.join([self.data_type, path.split('/')[1]])
         dest = f"{root}/{path}"
         while i < retry:
             try:
                 if not os.path.exists(dest):
-                    s3.download_file(bucket, src, dest)
+                    self.s3.download_file(self.bucket, src, dest)
                 else:
                     logging.debug(f"{dest} already exists.")
                 with lock:
@@ -73,26 +72,30 @@ class Data_utils:
                 return
             except botocore.exceptions.ClientError as e:
                 if e.response['Error']['Code'] == "404":
-                    logging.warning(f"The file s3://{bucket}/{src} does not exist.")
+                    logging.warning(f"The file s3://{self.bucket}/{src} does not exist.")
                     return
                 i += 1
                 logging.warning(f"Sleep {i} and try again.")
-                time.sleep(i)
+                #time.sleep(i)
             
-    def batch_download(self, bucket, file_paths, root, num_workers=10, retry=10):
+    def batch_download(self, file_paths, root, num_workers=10, retry=10):
         with Pool(num_workers) as p:
             m = Manager()
             counter = m.Value('i', 0)
             lock = m.Lock()
-            download_ = functools.partial(self.download, bucket, root, 3, counter, lock)
-            p.map(download_, file_paths)
+            download_ = functools.partial(self.download, root, 3, counter, lock)
+            try:
+                p.map(download_, file_paths)
+            except:
+                print('batch dl is cancelled due to error')
+                self.batch_dl = 0
 
     def prepare_dirs(self):
         for c in self.classes:
             if not os.path.exists(f'{self.data_root}/{c}'):
                 os.makedirs(f'{self.data_root}/{c}')
 
-    def dl_classes(self, df, bucket, class_name_count, cut_images_flag=False):
+    def dl_classes(self, df, class_name_count, cut_images_flag=False):
         try:
             ids = class_name_count[class_name_count.name.isin(self.classes)].id.values
         except:
@@ -103,7 +106,14 @@ class Data_utils:
         logging.info('downloading images', Counter([self.id2name[i] for i in df1.LabelName.values]))
         for j in range(len(imgs)//n_work):
             image_files = [f'{self.id2name[i[1].LabelName]}/{i[1].ImageID}.jpg' for i in imgs[(n_work)*j:n_work*(j+1)].iterrows()]
-            self.batch_download(bucket, image_files, self.data_root, n_work, False)
+            if self.batch_dl:
+                self.batch_download(image_files, self.data_root, n_work, False)
+            else:
+                for file in image_files:
+                    m = Manager()
+                    counter = m.Value('i', 0)
+                    lock = m.Lock()
+                    self.download(self.data_root, 3, counter, lock, file)
 
         if cut_images_flag:
             print(cut_images_flag)
@@ -136,6 +146,7 @@ if __name__ == '__main__':
     parser.add_argument('--data_root', type=str, help='folder where image files will be stored', default="'/home/gidi/data/open images/'")
     parser.add_argument('--classes', type=str, help='', default=['Orange','Banana','Apple'],nargs='+')
     parser.add_argument('--data_type', type=str, help='', default='test')
+    parser.add_argument('--batch_dl', type=str, help='', default=1)
     parser.add_argument('--cut_images', type=bool, help='cut the object from the image (one object from image)', default=False)
     args = parser.parse_args()
     
@@ -143,15 +154,15 @@ if __name__ == '__main__':
     classes = args.classes
     data_type = args.data_type
     
-    data_utils = Data_utils(data_root, classes, data_type)
+    data_utils = Data_utils(data_root, classes, data_type, args.batch_dl)
     
     data_utils.prepare_dirs()
     
-    s3, bucket = data_utils.get_s3()
+    data_utils.get_s3()
 
     df ,class_name_count = data_utils.get_data_sets()
 
-    data_utils.dl_classes(df, bucket, class_name_count, args.cut_images)
+    data_utils.dl_classes(df, class_name_count, args.cut_images)
     
     # TODO: add logging, add prepare dirs logic
     
